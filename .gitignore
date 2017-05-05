@@ -1,0 +1,7 @@
+*.deb
+*.zip
+*.cache
+*.ipython
+*.local
+*~
+*.pyc
