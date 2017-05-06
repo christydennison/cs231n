@@ -232,14 +232,14 @@ def batchnorm_backward(dout, cache):
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
     x, x_hat, sample_mean, sample_var, gamma, inv_sq_var_e, sqrt_var_e, var_e, N = cache
-    x_minus_mu = x-sample_mean
+    x_minus_mean = x - sample_mean
 
     dgamma = np.sum(x_hat*dout, axis=0)
     dbeta = np.sum(dout, axis=0)
     
     # back prop for x using a graph (this was really hard)
-    dx_minus_mu = np.sum(gamma*dout * x_minus_mu, axis=0) * -0.5*(var_e**-1.5) * N**-1 * 2 * x_minus_mu + dout*gamma*inv_sq_var_e
-    dx = dx_minus_mu - np.sum(dx_minus_mu, axis=0)/N
+    dx_minus_mean = np.sum(gamma*dout*x_minus_mean, axis=0) * -0.5*(var_e**-1.5) * N**-1 * 2 * x_minus_mean + dout*gamma*inv_sq_var_e
+    dx = dx_minus_mean - np.sum(dx_minus_mean, axis=0)/N
     
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -272,7 +272,7 @@ def batchnorm_backward_alt(dout, cache):
     ###########################################################################
     x, x_hat, sample_mean, sample_var, gamma, inv_sq_var_e, sqrt_var_e, var_e, N = cache
     sum_y = np.sum(dout,axis=0)
-    x_minus_mean = (x - sample_mean)
+    x_minus_mean = x - sample_mean
 
     # this was hard but not so bad once you realized that sum(x_hat) = 0
     dx = (gamma*inv_sq_var_e/N)*(N*dout - sum_y - x_minus_mean*np.sum(x_minus_mean*dout, axis=0)/var_e)
@@ -401,7 +401,6 @@ def conv_forward_naive(x, w, b, conv_param):
 
     for f in range(F):
         filtr = w[f]
-
         for hti, ht in enumerate(range(HH, H+2*pad+1, stride)):
             for widi, wid in enumerate(range(WW, W+2*pad+1, stride)):
                 x_sample = padded[:, :, ht-HH:ht, wid-WW:wid]

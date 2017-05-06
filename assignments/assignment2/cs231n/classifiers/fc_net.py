@@ -365,9 +365,7 @@ def affine_relu_forward_wdrop(x, w, b, use_dropout, dropout_param):
     out, relu_cache = relu_forward(a)
     drop_cache = None
     if use_dropout:
-        #print("using dropout",(out == 0).mean())
         out, drop_cache = dropout_forward(out, dropout_param)
-        #print("used dropout",(out == 0).mean())
     cache = (fc_cache, relu_cache, drop_cache)
     return out, cache
 
@@ -378,9 +376,7 @@ def affine_relu_backward_wdrop(dout, cache, use_dropout):
     """
     fc_cache, relu_cache, drop_cache = cache
     if use_dropout:
-        #print("using dropout",(dout == 0).mean())
         dout = dropout_backward(dout, drop_cache)
-        #print("used dropout",(dout == 0).mean())
     da = relu_backward(dout, relu_cache)
     dx, dw, db = affine_backward(da, fc_cache)
     return dx, dw, db
