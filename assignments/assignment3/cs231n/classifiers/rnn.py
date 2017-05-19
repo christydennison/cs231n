@@ -141,27 +141,27 @@ class CaptioningRNN(object):
         
         embed_out, embed_cache = word_embedding_forward(captions_in, W_embed)
         
-        if self.cell_type == 'rnn':
-            h, cache_rnn = rnn_forward(embed_out, aff_out, Wx, Wh, b)
-            out_t_aff, cache_t_aff = temporal_affine_forward(h, W_vocab, b_vocab)
-            loss, dout = temporal_softmax_loss(out_t_aff, captions_out, mask)
-            
-            dh, dw_vocab, db_vocab = temporal_affine_backward(dout, cache_t_aff)
-            dembed, daff_out, dWx, dWh, db = rnn_backward(dh, cache_rnn)
-            
-            dW_embed = word_embedding_backward(dembed, embed_cache)
-            dfeatures, dW_proj, db_proj = affine_backward(daff_out, aff_cache)
-            
-            grads['W_vocab'] = dw_vocab
-            grads['b_vocab'] = db_vocab
-            grads['Wx'] = dWx
-            grads['Wh'] = dWh
-            grads['b'] = db
-            grads['W_embed'] = dW_embed
-            grads['W_proj'] = dW_proj
-            grads['b_proj'] = db_proj
-        else:
-            return "cry"
+        cell_fn = rnn_forward if self.cell_type == 'rnn' else lstm_forward
+        h, cache_cell = cell_fn(embed_out, aff_out, Wx, Wh, b)
+
+        out_t_aff, cache_t_aff = temporal_affine_forward(h, W_vocab, b_vocab)
+        loss, dout = temporal_softmax_loss(out_t_aff, captions_out, mask)
+        dh, dw_vocab, db_vocab = temporal_affine_backward(dout, cache_t_aff)
+        
+        cell_bckwd_fn = rnn_backward if self.cell_type == 'rnn' else lstm_backward
+        dembed, daff_out, dWx, dWh, db = cell_bckwd_fn(dh, cache_cell)
+
+        dW_embed = word_embedding_backward(dembed, embed_cache)
+        dfeatures, dW_proj, db_proj = affine_backward(daff_out, aff_cache)
+
+        grads['W_vocab'] = dw_vocab
+        grads['b_vocab'] = db_vocab
+        grads['Wx'] = dWx
+        grads['Wh'] = dWh
+        grads['b'] = db
+        grads['W_embed'] = dW_embed
+        grads['W_proj'] = dW_proj
+        grads['b_proj'] = db_proj
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -223,7 +223,21 @@ class CaptioningRNN(object):
         # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
         # a loop.                                                                 #
         ###########################################################################
-        pass
+        aff_out, _ = affine_forward(features, W_proj, b_proj)
+        prev_h = aff_out
+        emb_words = W_embed[self._start]
+        
+        for t in range(max_length):
+            if self.cell_type == 'rnn':
+                do
+            
+            next_h, _ = rnn_step_forward(emb_words, prev_h, Wx, Wh, b)
+            scores, _ = affine_forward(next_h, W_vocab, b_vocab)
+            prev_h = next_h
+            max_idx = np.argmax(scores, axis=1)
+            emb_words = W_embed[max_idx]
+            captions[:,t] = max_idx
+
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
