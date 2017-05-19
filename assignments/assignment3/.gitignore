@@ -1,0 +1,13 @@
+*.swp
+*.pyc
+.env/*
+**/datasets/*
+*.local
+*.cache
+*.zip
+*~
+**/dataset/*
+.ipynb_checkpoints/*
+*.npz
+
+!**/datasets/*.sh
