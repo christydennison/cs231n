@@ -225,13 +225,17 @@ class CaptioningRNN(object):
         ###########################################################################
         aff_out, _ = affine_forward(features, W_proj, b_proj)
         prev_h = aff_out
+        prev_c = np.zeros_like(aff_out)
         emb_words = W_embed[self._start]
         
         for t in range(max_length):
+            next_h, next_c = None, None
             if self.cell_type == 'rnn':
-                do
-            
-            next_h, _ = rnn_step_forward(emb_words, prev_h, Wx, Wh, b)
+                next_h, _ = rnn_step_forward(emb_words, prev_h, Wx, Wh, b)
+            else:
+                next_h, next_c, _ = lstm_step_forward(emb_words, prev_h, prev_c, Wx, Wh, b)
+                prev_c = next_c
+
             scores, _ = affine_forward(next_h, W_vocab, b_vocab)
             prev_h = next_h
             max_idx = np.argmax(scores, axis=1)
